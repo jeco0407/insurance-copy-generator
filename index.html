@@ -365,44 +365,30 @@ async function generateCopy() {
     });
 
     if (!response.ok) {
-      const err = await response.json().catch(() => ({ error: { message: `HTTP ${response.status}` } }));
-      throw new Error(err.error?.message || `HTTP ${response.status}`);
+      const err = await response.json().catch(() => ({ error: `HTTP ${response.status}` }));
+      throw new Error(err.error || `HTTP ${response.status}`);
     }
 
+    const data = await response.json();
+    if (data.error) throw new Error(data.error);
+
+    const fullText = data.text || '';
     resultCard.classList.add('show');
-    resultText.innerHTML = '<span class="stream-cursor"></span>';
+    resultText.textContent = '';
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let fullText = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      const chunk = decoder.decode(value, { stream: true });
-      for (const line of chunk.split('\n')) {
-        if (!line.startsWith('data: ')) continue;
-        const data = line.slice(6).trim();
-        if (data === '[DONE]') continue;
-        try {
-          const parsed = JSON.parse(data);
-          const chunk = parsed.choices?.[0]?.delta?.content;
-          if (chunk) {
-            fullText += chunk;
-            resultText.textContent = fullText;
-            const cursor = document.createElement('span');
-            cursor.className = 'stream-cursor';
-            resultText.appendChild(cursor);
-          }
-        } catch {}
+    // 打字機效果
+    let i = 0;
+    const type = () => {
+      if (i < fullText.length) {
+        resultText.textContent = fullText.slice(0, ++i);
+        setTimeout(type, 12);
+      } else {
+        const charCount = fullText.replace(/\s/g, '').length;
+        resultMeta.textContent = `${charCount} 字 · ${selectedPlatform}`;
+        resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
-    }
-
-    resultText.textContent = fullText;
-    const charCount = fullText.replace(/\s/g, '').length;
-    resultMeta.textContent = `${charCount} 字 · ${selectedPlatform}`;
-    resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    type();
 
   } catch (err) {
     showError('生成失敗：' + err.message);

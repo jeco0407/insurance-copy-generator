@@ -18,7 +18,7 @@ export default async function handler(req) {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return new Response(
-      JSON.stringify({ error: { message: '伺服器尚未設定 API Key，請聯繫管理員。' } }),
+      JSON.stringify({ error: '伺服器尚未設定 API Key，請聯繫管理員。' }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
@@ -28,7 +28,7 @@ export default async function handler(req) {
     body = await req.json();
   } catch {
     return new Response(
-      JSON.stringify({ error: { message: '無效的請求格式' } }),
+      JSON.stringify({ error: '無效的請求格式' }),
       { status: 400, headers: { 'Content-Type': 'application/json' } }
     );
   }
@@ -42,7 +42,7 @@ export default async function handler(req) {
     body: JSON.stringify({
       model: 'llama-3.3-70b-versatile',
       max_tokens: 1024,
-      stream: true,
+      stream: false,
       messages: [
         { role: 'system', content: body.system },
         ...body.messages,
@@ -51,20 +51,17 @@ export default async function handler(req) {
   });
 
   if (!upstream.ok) {
-    const error = await upstream.json().catch(() => ({
-      error: { message: `API 錯誤 ${upstream.status}` },
-    }));
-    return new Response(JSON.stringify(error), {
-      status: upstream.status,
-      headers: { 'Content-Type': 'application/json' },
-    });
+    const error = await upstream.json().catch(() => ({ error: `API 錯誤 ${upstream.status}` }));
+    return new Response(
+      JSON.stringify({ error: error.error?.message || error.error || `API 錯誤 ${upstream.status}` }),
+      { status: upstream.status, headers: { 'Content-Type': 'application/json' } }
+    );
   }
 
-  return new Response(upstream.body, {
-    headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache, no-transform',
-      'X-Accel-Buffering': 'no',
-    },
+  const result = await upstream.json();
+  const text = result.choices?.[0]?.message?.content || '';
+
+  return new Response(JSON.stringify({ text }), {
+    headers: { 'Content-Type': 'application/json' },
   });
 }
