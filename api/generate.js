@@ -15,7 +15,7 @@ export default async function handler(req) {
     return new Response('Method not allowed', { status: 405 });
   }
 
-  const apiKey = process.env.GEMINI_API_KEY;
+  const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) {
     return new Response(
       JSON.stringify({ error: { message: '伺服器尚未設定 API Key，請聯繫管理員。' } }),
@@ -33,22 +33,20 @@ export default async function handler(req) {
     );
   }
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent?alt=sse&key=${apiKey}`;
-
-  const upstream = await fetch(url, {
+  const upstream = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`,
+    },
     body: JSON.stringify({
-      system_instruction: {
-        parts: [{ text: body.system }],
-      },
-      contents: body.messages.map(m => ({
-        role: m.role === 'assistant' ? 'model' : 'user',
-        parts: [{ text: m.content }],
-      })),
-      generationConfig: {
-        maxOutputTokens: 1024,
-      },
+      model: 'llama-3.3-70b-versatile',
+      max_tokens: 1024,
+      stream: true,
+      messages: [
+        { role: 'system', content: body.system },
+        ...body.messages,
+      ],
     }),
   });
 
