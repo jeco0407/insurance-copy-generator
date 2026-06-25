@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>保險提示詞生成器 · 保險好鄰居</title>
+<title>AI 提示詞生成器 · 保險好鄰居</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
 
@@ -24,39 +24,13 @@
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); font-family: 'Montserrat', '微軟正黑體', 'Microsoft JhengHei', sans-serif; color: var(--text); min-height: 100vh; }
 
-  body {
-    background: var(--bg);
-    font-family: 'Montserrat', '微軟正黑體', 'Microsoft JhengHei', sans-serif;
-    color: var(--text);
-    min-height: 100vh;
-  }
-
-  header {
-    background: var(--navy);
-    padding: 18px 24px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
-  }
-  .logo-tag {
-    background: var(--accent);
-    color: var(--navy);
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    padding: 3px 8px;
-    border-radius: 2px;
-    text-transform: uppercase;
-    white-space: nowrap;
-  }
+  header { background: var(--navy); padding: 18px 24px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 10; box-shadow: 0 2px 12px rgba(0,0,0,0.15); }
+  .logo-tag { background: var(--accent); color: var(--navy); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; padding: 3px 8px; border-radius: 2px; text-transform: uppercase; white-space: nowrap; }
   header h1 { color: var(--white); font-size: 15px; font-weight: 600; }
 
-  main { max-width: 760px; margin: 0 auto; padding: 28px 20px 60px; }
+  main { max-width: 800px; margin: 0 auto; padding: 28px 20px 60px; }
 
   .hero { margin-bottom: 28px; }
   .hero-label { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
@@ -65,68 +39,64 @@
 
   .card { background: var(--card-bg); border: 1px solid var(--shadow); border-radius: 12px; padding: 24px; margin-bottom: 16px; }
 
-  .section-title {
-    font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
-    color: var(--navy); margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
-  }
+  .section-title { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--navy); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
   .section-title::after { content: ''; flex: 1; height: 1px; background: var(--shadow); }
 
-  /* AI Platform Cards */
-  .platform-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-  }
-  @media (max-width: 480px) { .platform-grid { grid-template-columns: 1fr; } }
+  /* Use case grid */
+  .usecase-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  @media (max-width: 560px) { .usecase-grid { grid-template-columns: repeat(2, 1fr); } }
 
-  .platform-btn {
-    background: var(--white);
-    border: 2px solid var(--shadow);
-    border-radius: 12px;
-    padding: 16px 12px;
-    cursor: pointer;
-    text-align: center;
-    transition: all 0.18s;
-    position: relative;
-    overflow: hidden;
+  .usecase-btn {
+    background: var(--white); border: 1.5px solid var(--shadow); border-radius: 10px;
+    padding: 14px 10px; cursor: pointer; text-align: center; transition: all 0.15s;
   }
-  .platform-btn::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    opacity: 0;
-    transition: opacity 0.18s;
-  }
-  .platform-btn[data-platform="chatgpt"]::before { background: var(--gpt-color); }
-  .platform-btn[data-platform="gemini"]::before { background: var(--gemini-color); }
-  .platform-btn[data-platform="claude"]::before { background: var(--claude-color); }
-
-  .platform-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
-  .platform-btn.active { border-color: transparent; box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
-  .platform-btn.active::before { opacity: 1; }
-  .platform-btn[data-platform="chatgpt"].active { border-color: var(--gpt-color); }
-  .platform-btn[data-platform="gemini"].active { border-color: var(--gemini-color); }
-  .platform-btn[data-platform="claude"].active { border-color: var(--claude-color); }
-
-  .p-icon { font-size: 28px; display: block; margin-bottom: 8px; }
-  .p-name { font-size: 13px; font-weight: 700; display: block; margin-bottom: 3px; color: var(--navy); }
-  .p-desc { font-size: 10px; color: var(--text-muted); line-height: 1.4; }
+  .usecase-btn:hover { border-color: var(--navy-light); transform: translateY(-1px); }
+  .usecase-btn.active { border-color: var(--navy); background: var(--navy); }
+  .usecase-btn .uc-emoji { font-size: 22px; display: block; margin-bottom: 6px; }
+  .usecase-btn .uc-name { font-size: 12px; font-weight: 700; display: block; color: var(--navy); }
+  .usecase-btn .uc-desc { font-size: 10px; color: var(--text-muted); line-height: 1.4; margin-top: 2px; display: block; }
+  .usecase-btn.active .uc-name { color: var(--white); }
+  .usecase-btn.active .uc-desc { color: rgba(255,255,255,0.6); }
 
   /* Fields */
   .field-group { margin-bottom: 16px; }
   .field-group:last-child { margin-bottom: 0; }
   label { display: block; font-size: 12px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
-  .label-optional { font-weight: 400; color: var(--text-muted); }
-  input[type="text"], textarea {
+  .label-optional { font-weight: 400; color: var(--text-muted); font-size: 11px; }
+  input[type="text"], textarea, select {
     width: 100%; background: var(--white); border: 1.5px solid var(--shadow);
     border-radius: 8px; padding: 10px 13px; font-size: 14px; font-family: inherit;
     color: var(--text); outline: none; transition: border-color 0.15s;
   }
-  input[type="text"]:focus, textarea:focus { border-color: var(--navy); }
-  textarea { resize: vertical; min-height: 80px; }
+  input[type="text"]:focus, textarea:focus, select:focus { border-color: var(--navy); }
+  textarea { resize: vertical; min-height: 72px; }
 
-  /* Generate Button */
+  /* Platform grid */
+  .platform-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  @media (max-width: 480px) { .platform-grid { grid-template-columns: 1fr; } }
+
+  .platform-btn {
+    background: var(--white); border: 2px solid var(--shadow); border-radius: 12px;
+    padding: 16px 10px; cursor: pointer; text-align: center; transition: all 0.18s;
+    position: relative; overflow: hidden;
+  }
+  .platform-btn::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; opacity: 0; transition: opacity 0.18s; }
+  .platform-btn[data-platform="chatgpt"]::before { background: var(--gpt-color); }
+  .platform-btn[data-platform="gemini"]::before { background: var(--gemini-color); }
+  .platform-btn[data-platform="claude"]::before { background: var(--claude-color); }
+  .platform-btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
+  .platform-btn.active { border-color: transparent; box-shadow: 0 4px 14px rgba(0,0,0,0.12); }
+  .platform-btn.active::before { opacity: 1; }
+  .platform-btn[data-platform="chatgpt"].active { border-color: var(--gpt-color); }
+  .platform-btn[data-platform="gemini"].active { border-color: var(--gemini-color); }
+  .platform-btn[data-platform="claude"].active { border-color: var(--claude-color); }
+  .platform-btn:disabled { opacity: 0.38; cursor: not-allowed; transform: none !important; }
+  .p-icon { font-size: 26px; display: block; margin-bottom: 6px; }
+  .p-name { font-size: 13px; font-weight: 700; display: block; margin-bottom: 2px; color: var(--navy); }
+  .p-desc { font-size: 10px; color: var(--text-muted); line-height: 1.4; }
+  .p-badge { font-size: 9px; background: #FFE4E4; color: #B91C1C; border-radius: 4px; padding: 1px 5px; margin-top: 4px; display: inline-block; }
+
+  /* Generate button */
   .generate-btn {
     width: 100%; background: var(--navy); color: var(--white); border: none;
     border-radius: 10px; padding: 15px; font-size: 15px; font-weight: 700;
@@ -135,27 +105,18 @@
   }
   .generate-btn:hover { background: var(--navy-light); }
   .generate-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  .spinner {
-    width: 17px; height: 17px; border: 2px solid rgba(255,255,255,0.3);
-    border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: none;
-  }
+  .spinner { width: 17px; height: 17px; border: 2px solid rgba(255,255,255,0.3); border-top-color: white; border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
   /* Result */
-  .result-card {
-    background: var(--white); border: 2px solid var(--accent);
-    border-radius: 12px; padding: 24px; margin-top: 16px; display: none;
-  }
+  .result-card { background: var(--white); border: 2px solid var(--accent); border-radius: 12px; padding: 24px; margin-top: 16px; display: none; }
   .result-card.show { display: block; animation: fadeIn 0.3s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
   .result-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; gap: 10px; flex-wrap: wrap; }
-  .result-label-wrap { display: flex; flex-direction: column; gap: 4px; }
+  .result-label-wrap { display: flex; flex-direction: column; gap: 3px; }
   .result-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
   .result-hint { font-size: 11px; color: var(--text-muted); }
-
-  .result-actions { display: flex; gap: 8px; flex-shrink: 0; }
+  .result-meta { font-size: 11px; color: var(--text-muted); margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--shadow); }
   .action-btn {
     background: transparent; border: 1.5px solid var(--shadow); border-radius: 6px;
     padding: 6px 14px; font-size: 12px; font-weight: 600; font-family: inherit;
@@ -163,30 +124,15 @@
   }
   .action-btn:hover { border-color: var(--navy); color: var(--navy); }
   .action-btn.copied { border-color: var(--success); color: var(--success); }
-
-  .result-meta { font-size: 11px; color: var(--text-muted); margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--shadow); }
-
   .result-text {
-    font-size: 13.5px; line-height: 1.9; color: var(--text);
+    font-size: 13px; line-height: 1.9; color: var(--text);
     white-space: pre-wrap; word-break: break-word;
     font-family: 'Courier New', 'Consolas', monospace;
-    background: #FAFAF7;
-    border-radius: 8px;
-    padding: 16px;
+    background: #FAFAF7; border-radius: 8px; padding: 16px;
   }
 
-  .error-msg {
-    background: #FFF0F0; border: 1px solid #FFCCCC; border-radius: 8px;
-    padding: 12px 16px; font-size: 13px; color: #C0392B; margin-top: 14px; display: none;
-  }
+  .error-msg { background: #FFF0F0; border: 1px solid #FFCCCC; border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #C0392B; margin-top: 14px; display: none; }
   .error-msg.show { display: block; }
-
-  .stream-cursor {
-    display: inline-block; width: 8px; height: 1.2em; background: var(--navy);
-    animation: blink 0.8s step-end infinite; vertical-align: text-bottom; margin-left: 2px;
-    border-radius: 1px;
-  }
-  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
   footer { text-align: center; padding: 24px; font-size: 12px; color: var(--text-muted); }
 </style>
@@ -195,44 +141,67 @@
 
 <header>
   <span class="logo-tag">保險好鄰居</span>
-  <h1>提示詞生成器</h1>
+  <h1>AI 提示詞生成器</h1>
 </header>
 
 <main>
   <div class="hero">
-    <div class="hero-label">AI Prompt 工具</div>
-    <h2>一鍵生成專屬提示詞，<br>貼入 AI 立即產出文案</h2>
-    <p>填入產品與客群，選擇你要使用的 AI 工具，系統自動生成最適合該平台的提示詞格式。</p>
+    <div class="hero-label">Prompt Generator</div>
+    <h2>選擇情境，一鍵生成<br>最適合的 AI 提示詞</h2>
+    <p>選擇使用情境與 AI 平台，自動生成針對該平台格式優化的提示詞，複製後直接貼入使用。</p>
   </div>
 
-  <!-- Step 1: Fill Info -->
+  <!-- Step 1: Use Case -->
   <div class="card">
-    <div class="section-title">填入內容</div>
-
-    <div class="field-group">
-      <label>賣什麼？（產品 / 服務 / 主題）</label>
-      <input type="text" id="product" placeholder="例：長照險、投資型保單、定期壽險…">
-    </div>
-
-    <div class="field-group">
-      <label>賣給誰？（目標客群）</label>
-      <input type="text" id="audience" placeholder="例：50歲屆退族、新婚夫妻、小資上班族…">
-    </div>
-
-    <div class="field-group">
-      <label>最想強調什麼？<span class="label-optional">選填</span></label>
-      <textarea id="emphasis" placeholder="例：退休後現金流、醫療費用讓家人措手不及、年輕人覺得保險很貴…"></textarea>
+    <div class="section-title">選擇使用情境</div>
+    <div class="usecase-grid">
+      <button class="usecase-btn active" data-usecase="insurance" onclick="selectUseCase(this)">
+        <span class="uc-emoji">📋</span>
+        <span class="uc-name">保險行銷文案</span>
+        <span class="uc-desc">有溫度的行銷貼文</span>
+      </button>
+      <button class="usecase-btn" data-usecase="image" onclick="selectUseCase(this)">
+        <span class="uc-emoji">🖼️</span>
+        <span class="uc-name">圖片生成</span>
+        <span class="uc-desc">AI 生圖詳細提示詞</span>
+      </button>
+      <button class="usecase-btn" data-usecase="social" onclick="selectUseCase(this)">
+        <span class="uc-emoji">📱</span>
+        <span class="uc-name">社群媒體貼文</span>
+        <span class="uc-desc">FB / IG / LINE / Threads</span>
+      </button>
+      <button class="usecase-btn" data-usecase="video" onclick="selectUseCase(this)">
+        <span class="uc-emoji">🎬</span>
+        <span class="uc-name">短影音腳本</span>
+        <span class="uc-desc">Reels / TikTok / Shorts</span>
+      </button>
+      <button class="usecase-btn" data-usecase="email" onclick="selectUseCase(this)">
+        <span class="uc-emoji">✉️</span>
+        <span class="uc-name">客戶信件訊息</span>
+        <span class="uc-desc">Email / LINE 跟進</span>
+      </button>
+      <button class="usecase-btn" data-usecase="presentation" onclick="selectUseCase(this)">
+        <span class="uc-emoji">📊</span>
+        <span class="uc-name">簡報大綱</span>
+        <span class="uc-desc">早會 / 課程 / 提案</span>
+      </button>
     </div>
   </div>
 
-  <!-- Step 2: Choose Platform -->
+  <!-- Step 2: Fields -->
+  <div class="card">
+    <div class="section-title" id="fieldsTitle">填入內容</div>
+    <div id="fieldsContainer"></div>
+  </div>
+
+  <!-- Step 3: Platform -->
   <div class="card">
     <div class="section-title">選擇 AI 平台</div>
     <div class="platform-grid">
       <button class="platform-btn active" data-platform="chatgpt" onclick="selectPlatform(this)">
         <span class="p-icon">🤖</span>
         <span class="p-name">ChatGPT</span>
-        <span class="p-desc">角色扮演 + 步驟指令格式</span>
+        <span class="p-desc">角色扮演 + 步驟格式</span>
       </button>
       <button class="platform-btn" data-platform="gemini" onclick="selectPlatform(this)">
         <span class="p-icon">✨</span>
@@ -242,12 +211,12 @@
       <button class="platform-btn" data-platform="claude" onclick="selectPlatform(this)">
         <span class="p-icon">🟠</span>
         <span class="p-name">Claude</span>
-        <span class="p-desc">完整 XML 巢狀結構格式</span>
+        <span class="p-desc">完整 XML 巢狀格式</span>
       </button>
     </div>
   </div>
 
-  <button class="generate-btn" id="generateBtn" onclick="generatePrompt()">
+  <button class="generate-btn" id="generateBtn" onclick="generate()">
     <div class="spinner" id="spinner"></div>
     <span id="btnText">✦ 生成提示詞</span>
   </button>
@@ -260,9 +229,7 @@
         <span class="result-label">✦ 生成的提示詞</span>
         <span class="result-hint" id="resultHint"></span>
       </div>
-      <div class="result-actions">
-        <button class="action-btn" id="copyBtn" onclick="copyPrompt()">複製提示詞</button>
-      </div>
+      <button class="action-btn" id="copyBtn" onclick="copyResult()">複製提示詞</button>
     </div>
     <div class="result-meta" id="resultMeta"></div>
     <div class="result-text" id="resultText"></div>
@@ -272,64 +239,189 @@
 <footer>保險好鄰居 @urbxneighbor · 由 Groq AI 驅動</footer>
 
 <script>
+const USE_CASES = {
+  insurance: {
+    name: '保險行銷文案',
+    platforms: ['chatgpt', 'gemini', 'claude'],
+    fields: [
+      { id: 'f1', label: '賣什麼？（產品 / 主題）', type: 'text', placeholder: '例：長照險、投資型保單、定期壽險…' },
+      { id: 'f2', label: '賣給誰？（目標客群）', type: 'text', placeholder: '例：50歲屆退族、新婚夫妻、小資上班族…' },
+      { id: 'f3', label: '最想強調的痛點或賣點', type: 'textarea', placeholder: '例：退休後現金流不夠、醫療費用讓家人措手不及…', optional: true },
+    ]
+  },
+  image: {
+    name: '圖片生成',
+    platforms: ['chatgpt', 'gemini'],
+    fields: [
+      { id: 'f1', label: '想生成什麼？（主題 / 場景）', type: 'text', placeholder: '例：業務員與銀髮客戶在咖啡廳輕鬆談保險的溫馨場景…' },
+      { id: 'f2', label: '圖片風格', type: 'text', placeholder: '例：寫實攝影、溫暖插畫、商業廣告風、水彩手繪…' },
+      { id: 'f3', label: '圖片用途', type: 'text', placeholder: '例：FB 封面、LINE 貼文、簡報封面、名片背景…', optional: true },
+      { id: 'f4', label: '特別要求', type: 'text', placeholder: '例：不要出現文字、台灣人面孔、明亮色調…', optional: true },
+    ]
+  },
+  social: {
+    name: '社群媒體貼文',
+    platforms: ['chatgpt', 'gemini', 'claude'],
+    fields: [
+      { id: 'f1', label: '貼文主題 / 事件', type: 'text', placeholder: '例：分享一個感人理賠故事、年底保單健診提醒…' },
+      { id: 'f2', label: '發布平台', type: 'text', placeholder: '例：Facebook、Instagram、LINE、Threads…' },
+      { id: 'f3', label: '目標受眾', type: 'text', placeholder: '例：30-50歲上班族、新婚族群…', optional: true },
+      { id: 'f4', label: '語氣風格', type: 'text', placeholder: '例：溫暖故事型、幽默輕鬆、專業說理…', optional: true },
+    ]
+  },
+  video: {
+    name: '短影音腳本',
+    platforms: ['chatgpt', 'gemini', 'claude'],
+    fields: [
+      { id: 'f1', label: '影片主題', type: 'text', placeholder: '例：三個保險新手常犯的錯誤、長照險你一定要知道的事…' },
+      { id: 'f2', label: '影片時長', type: 'text', placeholder: '例：15秒 / 30秒 / 60秒' },
+      { id: 'f3', label: '目標觀眾', type: 'text', placeholder: '例：30歲上班族、保險新人、準退休族…', optional: true },
+    ]
+  },
+  email: {
+    name: '客戶信件 / 訊息',
+    platforms: ['chatgpt', 'gemini', 'claude'],
+    fields: [
+      { id: 'f1', label: '信件目的', type: 'text', placeholder: '例：節日問候、保單週年提醒、邀約面談、新商品介紹…' },
+      { id: 'f2', label: '收件對象', type: 'text', placeholder: '例：多年老客戶、剛認識的潛在客戶、公司同事…' },
+      { id: 'f3', label: '語氣', type: 'text', placeholder: '例：正式專業、輕鬆親切、溫暖關懷…', optional: true },
+    ]
+  },
+  presentation: {
+    name: '簡報大綱',
+    platforms: ['chatgpt', 'gemini', 'claude'],
+    fields: [
+      { id: 'f1', label: '簡報主題', type: 'text', placeholder: '例：長照險市場趨勢分析、增員說明會、保單健診教學…' },
+      { id: 'f2', label: '聽眾對象', type: 'text', placeholder: '例：保險業務員、潛在增員對象、主管、一般民眾…' },
+      { id: 'f3', label: '時長 / 頁數', type: 'text', placeholder: '例：10分鐘 / 15頁 / 30分鐘含Q&A…', optional: true },
+    ]
+  }
+};
+
+const PLATFORM_NAMES = { chatgpt: 'ChatGPT', gemini: 'Gemini', claude: 'Claude' };
 const PLATFORM_HINTS = {
   chatgpt: '複製後貼入 ChatGPT 對話框',
   gemini: '複製後貼入 Gemini 對話框',
   claude: '複製後貼入 Claude 對話框',
 };
 
-const PLATFORM_NAMES = {
-  chatgpt: 'ChatGPT',
-  gemini: 'Gemini',
-  claude: 'Claude',
-};
+const SYSTEM_PROMPT = `你是一位專業的 AI 提示詞工程師。
 
-const SYSTEM_PROMPT = `你是一位專業的 AI 提示詞工程師，專門為保險行銷業務員設計提示詞。
+你的任務：根據使用者提供的「使用情境」和「目標 AI 平台」，生成一份可直接複製貼入該 AI 工具的提示詞。
 
-根據使用者提供的產品、客群、重點，生成一份可直接複製貼入指定 AI 工具的提示詞。
+【絕對規則】
+1. 生成的提示詞必須全部使用繁體中文（XML 標籤名稱例外，可保留英文）
+2. 只輸出提示詞本身，不要加任何前言、說明或解釋文字
+3. 不要輸出「以下是提示詞：」之類的引導句
 
-【重要規則】
-- 生成的提示詞必須全部使用繁體中文撰寫，不可出現英文句子
-- 標籤名稱（如 XML tag）可以保留英文，但標籤內容與所有指令文字必須是繁體中文
-- 語氣自然，符合台灣使用習慣
+【三個平台的格式規則】
 
-提示詞的最終目的：讓 AI 生成一段 200-300 字、吸引人的保險行銷文案，繁體中文、台灣用語、口語自然。
-
-根據不同平台的特性產出對應格式：
-
-【ChatGPT 格式】
-- 開頭用「請你扮演...」定義角色（繁體中文）
-- 用編號步驟說明任務
+ChatGPT 格式：
+- 第一行用「請你扮演一位...」定義角色
+- 用編號步驟（1. 2. 3.）列出任務要求
 - 加入「請逐步思考後再輸出」提升品質
-- 結尾明確說明輸出要求
+- 最後明確說明輸出格式與長度限制
 
-【Gemini 格式】
-- 語言簡潔直接，不贅述
-- 使用 XML 標籤：<context>, <task>, <input>, <requirements>
-- 每個標籤內容精簡，一行一點，全部繁體中文
+Gemini 格式：
+- 使用 XML 標籤結構：<context>, <task>, <input>, <requirements>
+- 語言精簡，不冗長，每個標籤內容條列清楚
+- 標籤內文字全部繁體中文
 
-【Claude 格式】
-- 使用完整巢狀 XML 結構
-- 標籤順序：<context> → <task> → <input> → <instructions> → <output_format>
-- 標籤內容全部繁體中文，可加入更細緻的條件與規範
+Claude 格式：
+- 完整巢狀 XML：<context> → <task> → <input> → <instructions> → <output_format>
+- 可加入更細緻的條件、假設、限制說明
+- 標籤內文字全部繁體中文
 
-只輸出提示詞本身，不要加任何說明、解釋或前後文字。`;
+【各情境提示詞重點】
 
+保險行銷文案：強調情感共鳴、台灣口語，不說教，像朋友說話，結尾有行動呼籲
+
+圖片生成（僅限 ChatGPT / Gemini）：
+- ChatGPT Image：流暢描述性段落，包含：主體與場景、光線（方向/色溫）、色彩調性、風格（攝影/插畫/水彩）、構圖（廣角/特寫/視角）、質感細節、負向描述（不要出現的元素）
+- Gemini 圖片：電影攝影語言，包含：場景描述、鏡頭類型、光線氛圍、色彩調性、風格標籤
+
+社群媒體貼文：符合平台特性，加入互動問句或表情符號，適合分享轉發
+
+短影音腳本：分鏡格式，每行一個鏡頭或旁白，口語化，有節奏感，前3秒抓住注意力
+
+客戶信件：溫暖但專業，適當稱謂，有明確行動呼籲，不超過3段
+
+簡報大綱：結構清晰（開場→主體→結尾），含各頁主標題，有時間分配建議`;
+
+let selectedUseCase = 'insurance';
 let selectedPlatform = 'chatgpt';
 
+function selectUseCase(btn) {
+  document.querySelectorAll('.usecase-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedUseCase = btn.dataset.usecase;
+  renderFields();
+  updatePlatformAvailability();
+  document.getElementById('resultCard').classList.remove('show');
+}
+
 function selectPlatform(btn) {
+  if (btn.disabled) return;
   document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   selectedPlatform = btn.dataset.platform;
 }
 
-async function generatePrompt() {
-  const product = document.getElementById('product').value.trim();
-  const audience = document.getElementById('audience').value.trim();
-  const emphasis = document.getElementById('emphasis').value.trim();
+function renderFields() {
+  const fields = USE_CASES[selectedUseCase].fields;
+  const container = document.getElementById('fieldsContainer');
+  container.innerHTML = fields.map(f => `
+    <div class="field-group">
+      <label for="${f.id}">${f.label}${f.optional ? ' <span class="label-optional">選填</span>' : ''}</label>
+      ${f.type === 'textarea'
+        ? `<textarea id="${f.id}" placeholder="${f.placeholder}"></textarea>`
+        : `<input type="text" id="${f.id}" placeholder="${f.placeholder}">`
+      }
+    </div>
+  `).join('');
+}
 
-  if (!product || !audience) {
-    showError('請填入「賣什麼」和「賣給誰」兩個欄位 😊');
+function updatePlatformAvailability() {
+  const allowed = USE_CASES[selectedUseCase].platforms;
+  const claudeBtn = document.querySelector('.platform-btn[data-platform="claude"]');
+  const claudeBadge = claudeBtn.querySelector('.p-badge');
+
+  document.querySelectorAll('.platform-btn').forEach(btn => {
+    const p = btn.dataset.platform;
+    if (allowed.includes(p)) {
+      btn.disabled = false;
+      btn.querySelector('.p-badge')?.remove();
+    } else {
+      btn.disabled = true;
+      btn.classList.remove('active');
+      if (!btn.querySelector('.p-badge')) {
+        const badge = document.createElement('span');
+        badge.className = 'p-badge';
+        badge.textContent = '不支援此情境';
+        btn.appendChild(badge);
+      }
+    }
+  });
+
+  // If current selection is now disabled, switch to first allowed
+  if (!allowed.includes(selectedPlatform)) {
+    selectedPlatform = allowed[0];
+    document.querySelector(`.platform-btn[data-platform="${selectedPlatform}"]`).classList.add('active');
+  }
+}
+
+async function generate() {
+  const fields = USE_CASES[selectedUseCase].fields;
+  const values = {};
+  for (const f of fields) {
+    const el = document.getElementById(f.id);
+    if (el) values[f.id] = el.value.trim();
+  }
+
+  const requiredFields = fields.filter(f => !f.optional);
+  const missing = requiredFields.filter(f => !values[f.id]);
+  if (missing.length) {
+    showError(`請填入「${missing[0].label.replace(/？.*/, '')}」欄位 😊`);
     return;
   }
 
@@ -346,15 +438,19 @@ async function generatePrompt() {
   btnText.textContent = '生成中…';
   document.getElementById('errorMsg').classList.remove('show');
   resultCard.classList.remove('show');
-  resultText.textContent = '';
-  resultMeta.textContent = '';
 
-  const userMsg = `請為以下保險業務情境，生成適合貼入【${PLATFORM_NAMES[selectedPlatform]}】的提示詞：
+  const uc = USE_CASES[selectedUseCase];
+  let fieldSummary = uc.fields
+    .map(f => values[f.id] ? `${f.label.replace(/？.*/, '').replace(/（.*）/, '').trim()}：${values[f.id]}` : null)
+    .filter(Boolean)
+    .join('\n');
 
-產品／主題：${product}
-目標客群：${audience}
-強調重點：${emphasis || '未特別指定，請根據產品和客群自行判斷'}
+  const userMsg = `請為以下情境，生成適合貼入【${PLATFORM_NAMES[selectedPlatform]}】的提示詞。
+
+使用情境：${uc.name}
 目標平台：${PLATFORM_NAMES[selectedPlatform]}
+
+${fieldSummary}
 
 請直接輸出提示詞，不要加任何前言或解釋。`;
 
@@ -379,15 +475,14 @@ async function generatePrompt() {
     const fullText = data.text || '';
     resultCard.classList.add('show');
     resultHint.textContent = PLATFORM_HINTS[selectedPlatform];
-    resultMeta.textContent = `針對 ${PLATFORM_NAMES[selectedPlatform]} 優化 · 共 ${fullText.length} 字元`;
-
-    // 打字機效果
+    resultMeta.textContent = `${uc.name} · ${PLATFORM_NAMES[selectedPlatform]} 格式 · ${fullText.length} 字元`;
     resultText.textContent = '';
+
     let i = 0;
     const type = () => {
       if (i < fullText.length) {
         resultText.textContent = fullText.slice(0, ++i);
-        setTimeout(type, 8);
+        setTimeout(type, 7);
       } else {
         resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
@@ -409,7 +504,7 @@ function showError(msg) {
   el.classList.add('show');
 }
 
-async function copyPrompt() {
+async function copyResult() {
   const text = document.getElementById('resultText').textContent;
   const btn = document.getElementById('copyBtn');
   try {
@@ -421,6 +516,10 @@ async function copyPrompt() {
     btn.textContent = '請手動複製';
   }
 }
+
+// Init
+renderFields();
+updatePlatformAvailability();
 </script>
 </body>
 </html>
