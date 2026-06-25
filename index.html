@@ -253,10 +253,12 @@ const USE_CASES = {
     name: '圖片生成',
     platforms: ['chatgpt', 'gemini'],
     fields: [
-      { id: 'f1', label: '想生成什麼？（主題 / 場景）', type: 'text', placeholder: '例：業務員與銀髮客戶在咖啡廳輕鬆談保險的溫馨場景…' },
-      { id: 'f2', label: '圖片風格', type: 'text', placeholder: '例：寫實攝影、溫暖插畫、商業廣告風、水彩手繪…' },
-      { id: 'f3', label: '圖片用途', type: 'text', placeholder: '例：FB 封面、LINE 貼文、簡報封面、名片背景…', optional: true },
-      { id: 'f4', label: '特別要求', type: 'text', placeholder: '例：不要出現文字、台灣人面孔、明亮色調…', optional: true },
+      { id: 'f1', label: '圖片風格', type: 'text', placeholder: '例：溫馨插畫風、寫實攝影感、卡通可愛風、水彩手繪…' },
+      { id: 'f2', label: '主題 / 場景描述', type: 'text', placeholder: '例：業務員與銀髮客戶在咖啡廳輕鬆談保險的溫馨場景…' },
+      { id: 'f3', label: '角色特點', type: 'text', placeholder: '例：30歲女性業務員、穿藍色西裝、親切笑容、手持平板…', optional: true },
+      { id: 'f4', label: '角色動作', type: 'text', placeholder: '例：微笑說明保單內容、與客戶輕鬆握手…', optional: true },
+      { id: 'f5', label: '背景顏色 / 整體氛圍', type: 'text', placeholder: '例：淺米白色背景、溫暖陽光感、簡潔明亮…', optional: true },
+      { id: 'f6', label: '圖片尺寸 / 用途', type: 'text', placeholder: '例：1:1 FB 貼文、9:16 IG 限動、16:9 簡報封面…', optional: true },
     ]
   },
   social: {
@@ -337,8 +339,22 @@ Claude 格式：
 保險行銷文案：強調情感共鳴、台灣口語，不說教，像朋友說話，結尾有行動呼籲
 
 圖片生成（僅限 ChatGPT / Gemini）：
-- ChatGPT Image：流暢描述性段落，包含：主體與場景、光線（方向/色溫）、色彩調性、風格（攝影/插畫/水彩）、構圖（廣角/特寫/視角）、質感細節、負向描述（不要出現的元素）
-- Gemini 圖片：電影攝影語言，包含：場景描述、鏡頭類型、光線氛圍、色彩調性、風格標籤
+
+ChatGPT Image 格式：用流暢的描述性段落撰寫，包含：主體與場景、光線方向與色溫、色彩調性、風格（攝影/插畫/水彩）、構圖與視角、質感細節、最後加一行「請勿出現文字或浮水印」
+
+Gemini 圖片格式：必須嚴格按照以下模板輸出，每個欄位各自獨立一行，根據使用者輸入填入對應內容：
+
+使用參考圖完全相同的【風格】風格，生成一張插畫。
+
+角色：【角色特點與描述】
+
+動作：【角色動作描述】
+
+背景顏色：【背景顏色描述】
+
+整體氛圍：【整體氛圍描述】
+
+尺寸：【尺寸規格，如 1:1、16:9、9:16，若使用者未指定則填「1:1（正方形）」】
 
 社群媒體貼文：符合平台特性，加入互動問句或表情符號，適合分享轉發
 
