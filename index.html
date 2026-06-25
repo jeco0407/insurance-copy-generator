@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>保險文案生成器 · 保險好鄰居</title>
+<title>保險提示詞生成器 · 保險好鄰居</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap');
 
@@ -18,6 +18,9 @@
     --white: #FFFFFF;
     --card-bg: #F7F5EE;
     --success: #3A7D5C;
+    --gpt-color: #10A37F;
+    --gemini-color: #4285F4;
+    --claude-color: #D97706;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -68,40 +71,62 @@
   }
   .section-title::after { content: ''; flex: 1; height: 1px; background: var(--shadow); }
 
-  .template-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
-  @media (max-width: 480px) { .template-grid { grid-template-columns: 1fr; } }
-
-  .template-btn {
-    background: var(--white); border: 1.5px solid var(--shadow); border-radius: 8px;
-    padding: 11px 13px; cursor: pointer; text-align: left; transition: all 0.15s;
+  /* AI Platform Cards */
+  .platform-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
   }
-  .template-btn:hover { border-color: var(--navy-light); }
-  .template-btn.active { border-color: var(--navy); background: var(--navy); color: var(--white); }
-  .template-btn .t-emoji { font-size: 17px; display: block; margin-bottom: 4px; }
-  .template-btn .t-name { font-size: 13px; font-weight: 600; display: block; margin-bottom: 2px; }
-  .template-btn .t-desc { font-size: 11px; color: var(--text-muted); line-height: 1.4; }
-  .template-btn.active .t-desc { color: rgba(255,255,255,0.6); }
+  @media (max-width: 480px) { .platform-grid { grid-template-columns: 1fr; } }
 
+  .platform-btn {
+    background: var(--white);
+    border: 2px solid var(--shadow);
+    border-radius: 12px;
+    padding: 16px 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.18s;
+    position: relative;
+    overflow: hidden;
+  }
+  .platform-btn::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    opacity: 0;
+    transition: opacity 0.18s;
+  }
+  .platform-btn[data-platform="chatgpt"]::before { background: var(--gpt-color); }
+  .platform-btn[data-platform="gemini"]::before { background: var(--gemini-color); }
+  .platform-btn[data-platform="claude"]::before { background: var(--claude-color); }
+
+  .platform-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .platform-btn.active { border-color: transparent; box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  .platform-btn.active::before { opacity: 1; }
+  .platform-btn[data-platform="chatgpt"].active { border-color: var(--gpt-color); }
+  .platform-btn[data-platform="gemini"].active { border-color: var(--gemini-color); }
+  .platform-btn[data-platform="claude"].active { border-color: var(--claude-color); }
+
+  .p-icon { font-size: 28px; display: block; margin-bottom: 8px; }
+  .p-name { font-size: 13px; font-weight: 700; display: block; margin-bottom: 3px; color: var(--navy); }
+  .p-desc { font-size: 10px; color: var(--text-muted); line-height: 1.4; }
+
+  /* Fields */
   .field-group { margin-bottom: 16px; }
   .field-group:last-child { margin-bottom: 0; }
   label { display: block; font-size: 12px; font-weight: 700; color: var(--navy); margin-bottom: 6px; }
+  .label-optional { font-weight: 400; color: var(--text-muted); }
   input[type="text"], textarea {
     width: 100%; background: var(--white); border: 1.5px solid var(--shadow);
     border-radius: 8px; padding: 10px 13px; font-size: 14px; font-family: inherit;
     color: var(--text); outline: none; transition: border-color 0.15s;
   }
   input[type="text"]:focus, textarea:focus { border-color: var(--navy); }
-  textarea { resize: vertical; min-height: 68px; }
+  textarea { resize: vertical; min-height: 80px; }
 
-  .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
-  .chip {
-    background: var(--white); border: 1.5px solid var(--shadow); border-radius: 20px;
-    padding: 6px 13px; font-size: 12px; font-weight: 600; cursor: pointer;
-    transition: all 0.15s; color: var(--text-muted); font-family: inherit;
-  }
-  .chip:hover { border-color: var(--navy-light); color: var(--navy); }
-  .chip.active { background: var(--accent); border-color: var(--accent); color: var(--navy); }
-
+  /* Generate Button */
   .generate-btn {
     width: 100%; background: var(--navy); color: var(--white); border: none;
     border-radius: 10px; padding: 15px; font-size: 15px; font-weight: 700;
@@ -117,30 +142,37 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
+  /* Result */
   .result-card {
-    background: var(--white); border: 1.5px solid var(--accent);
+    background: var(--white); border: 2px solid var(--accent);
     border-radius: 12px; padding: 24px; margin-top: 16px; display: none;
   }
   .result-card.show { display: block; animation: fadeIn 0.3s ease; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 
-  .result-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; gap: 10px; flex-wrap: wrap; }
+  .result-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 10px; gap: 10px; flex-wrap: wrap; }
+  .result-label-wrap { display: flex; flex-direction: column; gap: 4px; }
   .result-label { font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); }
+  .result-hint { font-size: 11px; color: var(--text-muted); }
 
-  .result-meta { font-size: 11px; color: var(--text-muted); margin-bottom: 14px; }
-
-  .result-actions { display: flex; gap: 8px; }
+  .result-actions { display: flex; gap: 8px; flex-shrink: 0; }
   .action-btn {
     background: transparent; border: 1.5px solid var(--shadow); border-radius: 6px;
-    padding: 5px 12px; font-size: 12px; font-weight: 600; font-family: inherit;
+    padding: 6px 14px; font-size: 12px; font-weight: 600; font-family: inherit;
     cursor: pointer; color: var(--text-muted); transition: all 0.15s; white-space: nowrap;
   }
   .action-btn:hover { border-color: var(--navy); color: var(--navy); }
   .action-btn.copied { border-color: var(--success); color: var(--success); }
 
+  .result-meta { font-size: 11px; color: var(--text-muted); margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--shadow); }
+
   .result-text {
-    font-size: 14px; line-height: 1.9; color: var(--text);
+    font-size: 13.5px; line-height: 1.9; color: var(--text);
     white-space: pre-wrap; word-break: break-word;
+    font-family: 'Courier New', 'Consolas', monospace;
+    background: #FAFAF7;
+    border-radius: 8px;
+    padding: 16px;
   }
 
   .error-msg {
@@ -150,8 +182,9 @@
   .error-msg.show { display: block; }
 
   .stream-cursor {
-    display: inline-block; width: 2px; height: 1em; background: var(--navy);
+    display: inline-block; width: 8px; height: 1.2em; background: var(--navy);
     animation: blink 0.8s step-end infinite; vertical-align: text-bottom; margin-left: 2px;
+    border-radius: 1px;
   }
   @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
 
@@ -162,103 +195,73 @@
 
 <header>
   <span class="logo-tag">保險好鄰居</span>
-  <h1>保險文案生成器</h1>
+  <h1>保險提示詞生成器</h1>
 </header>
 
 <main>
   <div class="hero">
-    <div class="hero-label">AI 文案工具</div>
-    <h2>輸入關鍵字，<br>一秒生成行銷文案</h2>
-    <p>選擇故事框架，填入產品與客群，AI 幫你寫出有溫度的保險文案。</p>
+    <div class="hero-label">AI Prompt 工具</div>
+    <h2>一鍵生成專屬提示詞，<br>貼入 AI 立即產出文案</h2>
+    <p>填入產品與客群，選擇你要使用的 AI 工具，系統自動生成最適合該平台的提示詞格式。</p>
   </div>
 
-  <div class="card">
-    <div class="section-title">選擇故事框架</div>
-    <div class="template-grid">
-      <button class="template-btn active" data-id="three_pigs" onclick="selectTemplate(this)">
-        <span class="t-emoji">🐷</span>
-        <span class="t-name">三隻小豬心法</span>
-        <span class="t-desc">保障層次的重要性</span>
-      </button>
-      <button class="template-btn" data-id="cinderella" onclick="selectTemplate(this)">
-        <span class="t-emoji">👠</span>
-        <span class="t-name">灰姑娘心法</span>
-        <span class="t-desc">命運逆轉，保險改變人生</span>
-      </button>
-      <button class="template-btn" data-id="ant_grasshopper" onclick="selectTemplate(this)">
-        <span class="t-emoji">🐜</span>
-        <span class="t-name">螞蟻與蚱蜢</span>
-        <span class="t-desc">退休規劃最佳框架</span>
-      </button>
-      <button class="template-btn" data-id="ugly_duckling" onclick="selectTemplate(this)">
-        <span class="t-emoji">🦢</span>
-        <span class="t-name">醜小鴨心法</span>
-        <span class="t-desc">蛻變成長，適合增員主題</span>
-      </button>
-      <button class="template-btn" data-id="tortoise_hare" onclick="selectTemplate(this)">
-        <span class="t-emoji">🐢</span>
-        <span class="t-name">龜兔賽跑</span>
-        <span class="t-desc">穩健累積，長期致勝</span>
-      </button>
-      <button class="template-btn" data-id="umbrella" onclick="selectTemplate(this)">
-        <span class="t-emoji">☂️</span>
-        <span class="t-name">雨傘心法</span>
-        <span class="t-desc">晴天買傘，未雨綢繆</span>
-      </button>
-    </div>
-  </div>
-
+  <!-- Step 1: Fill Info -->
   <div class="card">
     <div class="section-title">填入內容</div>
 
     <div class="field-group">
       <label>賣什麼？（產品 / 服務 / 主題）</label>
-      <input type="text" id="product" placeholder="例：投資型保單、長照險、定期壽險…">
+      <input type="text" id="product" placeholder="例：長照險、投資型保單、定期壽險…">
     </div>
 
     <div class="field-group">
       <label>賣給誰？（目標客群）</label>
-      <input type="text" id="audience" placeholder="例：50歲屆退人士、新婚夫妻、小資上班族…">
+      <input type="text" id="audience" placeholder="例：50歲屆退族、新婚夫妻、小資上班族…">
     </div>
 
     <div class="field-group">
-      <label>最想強調什麼？（痛點 / 賣點 / 情境）<span style="font-weight:400;color:var(--text-muted)"> 選填</span></label>
-      <textarea id="emphasis" placeholder="例：退休後現金流不夠、醫療費用讓家人措手不及…"></textarea>
-    </div>
-
-    <div class="field-group">
-      <label>文案風格</label>
-      <div class="chip-row">
-        <button class="chip active" data-style="溫暖故事型" onclick="selectChip(this,'style')">🌿 溫暖故事</button>
-        <button class="chip" data-style="數據說理型" onclick="selectChip(this,'style')">📊 數據說理</button>
-        <button class="chip" data-style="問句鉤子型" onclick="selectChip(this,'style')">❓ 問句鉤子</button>
-        <button class="chip" data-style="行動呼籲型" onclick="selectChip(this,'style')">🎯 行動呼籲</button>
-      </div>
-    </div>
-
-    <div class="field-group">
-      <label>發布平台</label>
-      <div class="chip-row">
-        <button class="chip active" data-platform="FB / IG 貼文" onclick="selectChip(this,'platform')">📘 FB / IG</button>
-        <button class="chip" data-platform="LINE 訊息" onclick="selectChip(this,'platform')">💬 LINE</button>
-        <button class="chip" data-platform="早會口頭分享" onclick="selectChip(this,'platform')">🎤 早會</button>
-        <button class="chip" data-platform="短影音旁白腳本" onclick="selectChip(this,'platform')">🎬 短影音</button>
-      </div>
+      <label>最想強調什麼？<span class="label-optional">選填</span></label>
+      <textarea id="emphasis" placeholder="例：退休後現金流、醫療費用讓家人措手不及、年輕人覺得保險很貴…"></textarea>
     </div>
   </div>
 
-  <button class="generate-btn" id="generateBtn" onclick="generateCopy()">
+  <!-- Step 2: Choose Platform -->
+  <div class="card">
+    <div class="section-title">選擇 AI 平台</div>
+    <div class="platform-grid">
+      <button class="platform-btn active" data-platform="chatgpt" onclick="selectPlatform(this)">
+        <span class="p-icon">🤖</span>
+        <span class="p-name">ChatGPT</span>
+        <span class="p-desc">角色扮演 + 步驟指令格式</span>
+      </button>
+      <button class="platform-btn" data-platform="gemini" onclick="selectPlatform(this)">
+        <span class="p-icon">✨</span>
+        <span class="p-name">Gemini</span>
+        <span class="p-desc">簡潔 XML 標籤格式</span>
+      </button>
+      <button class="platform-btn" data-platform="claude" onclick="selectPlatform(this)">
+        <span class="p-icon">🟠</span>
+        <span class="p-name">Claude</span>
+        <span class="p-desc">完整 XML 巢狀結構格式</span>
+      </button>
+    </div>
+  </div>
+
+  <button class="generate-btn" id="generateBtn" onclick="generatePrompt()">
     <div class="spinner" id="spinner"></div>
-    <span id="btnText">✦ 生成文案</span>
+    <span id="btnText">✦ 生成提示詞</span>
   </button>
 
   <div class="error-msg" id="errorMsg"></div>
 
   <div class="result-card" id="resultCard">
     <div class="result-header">
-      <span class="result-label">✦ 生成結果</span>
+      <div class="result-label-wrap">
+        <span class="result-label">✦ 生成的提示詞</span>
+        <span class="result-hint" id="resultHint"></span>
+      </div>
       <div class="result-actions">
-        <button class="action-btn" id="copyBtn" onclick="copyCopy()">複製文案</button>
+        <button class="action-btn" id="copyBtn" onclick="copyPrompt()">複製提示詞</button>
       </div>
     </div>
     <div class="result-meta" id="resultMeta"></div>
@@ -266,54 +269,63 @@
   </div>
 </main>
 
-<footer>保險好鄰居 @urbxneighbor · 由 Gemini AI 驅動</footer>
+<footer>保險好鄰居 @urbxneighbor · 由 Groq AI 驅動</footer>
 
 <script>
-const TEMPLATES = {
-  three_pigs: {
-    system: `你是保險好鄰居（@urbxneighbor）的文案助理，擅長用溫暖、簡單易懂的方式解釋保險。文案風格：不說教、有生活感、讓人讀完想轉發。請用「三隻小豬」框架：第一隻（稻草屋）= 沒保障；第二隻（木屋）= 基本保障不足；第三隻（磚屋）= 完整規劃。用這個比喻帶出產品。`
-  },
-  cinderella: {
-    system: `你是保險好鄰居（@urbxneighbor）的文案助理，擅長用溫暖、簡單易懂的方式解釋保險。文案風格：不說教、有生活感、讓人讀完想轉發。請用「灰姑娘」框架：困境（風險）→ 仙女教母（保險規劃）→ 舞會（安心生活）→ 美好未來。`
-  },
-  ant_grasshopper: {
-    system: `你是保險好鄰居（@urbxneighbor）的文案助理，擅長用溫暖、簡單易懂的方式解釋保險。文案風格：不說教、有生活感、讓人讀完想轉發。請用「螞蟻與蚱蜢」框架對比：蚱蜢（只顧當下）vs 螞蟻（提早布局）。不要說教，讓讀者自然認同螞蟻的選擇。`
-  },
-  ugly_duckling: {
-    system: `你是保險好鄰居（@urbxneighbor）的文案助理，擅長用溫暖、簡單易懂的方式解釋保險。文案風格：不說教、有生活感、讓人讀完想轉發。請用「醜小鴨」框架：困境誤解 → 認識保險的過程 → 蛻變自信。適合增員或課程推廣。`
-  },
-  tortoise_hare: {
-    system: `你是保險好鄰居（@urbxneighbor）的文案助理，擅長用溫暖、簡單易懂的方式解釋保險。文案風格：不說教、有生活感、讓人讀完想轉發。請用「龜兔賽跑」框架：兔子（短視急功、忽視規劃）vs 烏龜（穩健累積、長期布局）。帶出定期定額或長期保障規劃的重要性，讓讀者認同慢而穩的選擇。`
-  },
-  umbrella: {
-    system: `你是保險好鄰居（@urbxneighbor）的文案助理，擅長用溫暖、簡單易懂的方式解釋保險。文案風格：不說教、有生活感、讓人讀完想轉發。請用「雨傘」比喻：晴天（現在健康）是買傘的最佳時機，等下雨（生病/事故）再想買傘已來不及。強調提早規劃的智慧，語氣溫和，不製造恐懼。`
-  }
+const PLATFORM_HINTS = {
+  chatgpt: '複製後貼入 ChatGPT 對話框',
+  gemini: '複製後貼入 Gemini 對話框',
+  claude: '複製後貼入 Claude 對話框',
 };
 
-let selectedTemplate = 'three_pigs';
-let selectedStyle = '溫暖故事型';
-let selectedPlatform = 'FB / IG 貼文';
+const PLATFORM_NAMES = {
+  chatgpt: 'ChatGPT',
+  gemini: 'Gemini',
+  claude: 'Claude',
+};
 
-function selectTemplate(btn) {
-  document.querySelectorAll('.template-btn').forEach(b => b.classList.remove('active'));
+const SYSTEM_PROMPT = `你是一位專業的 AI 提示詞工程師，專門為保險行銷業務員設計提示詞。
+
+根據使用者提供的產品、客群、重點，生成一份可直接複製貼入指定 AI 工具的提示詞。
+
+提示詞的最終目的：讓 AI 生成一段 200-300 字、吸引人的保險行銷文案，繁體中文、台灣用語、口語自然。
+
+根據不同平台的特性產出對應格式：
+
+【ChatGPT 格式】
+- 開頭用「Act as...」定義角色
+- 用編號步驟或清單說明任務
+- 加入「think step by step」提升品質
+- 結尾列明輸出格式要求
+
+【Gemini 格式】
+- 語言簡潔直接，不贅述
+- 使用 XML 標籤：<context>, <task>, <input>, <requirements>
+- 每個標籤內容精簡，一行一點
+
+【Claude 格式】
+- 使用完整巢狀 XML 結構
+- 標籤順序：<context> → <task> → <input> → <instructions> → <output_format>
+- 可加入更細緻的限制條件與輸出規範
+- Claude 支援複雜指令，可多加細節
+
+只輸出提示詞本身，不要加任何說明、解釋或前後文字。`;
+
+let selectedPlatform = 'chatgpt';
+
+function selectPlatform(btn) {
+  document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  selectedTemplate = btn.dataset.id;
+  selectedPlatform = btn.dataset.platform;
 }
 
-function selectChip(btn, type) {
-  btn.closest('.chip-row').querySelectorAll('.chip').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  if (type === 'style') selectedStyle = btn.dataset.style;
-  else selectedPlatform = btn.dataset.platform;
-}
-
-async function generateCopy() {
+async function generatePrompt() {
   const product = document.getElementById('product').value.trim();
   const audience = document.getElementById('audience').value.trim();
   const emphasis = document.getElementById('emphasis').value.trim();
 
   if (!product || !audience) {
-    showError('請至少填入「賣什麼」和「賣給誰」兩個欄位 😊');
+    showError('請填入「賣什麼」和「賣給誰」兩個欄位 😊');
     return;
   }
 
@@ -323,6 +335,7 @@ async function generateCopy() {
   const resultCard = document.getElementById('resultCard');
   const resultText = document.getElementById('resultText');
   const resultMeta = document.getElementById('resultMeta');
+  const resultHint = document.getElementById('resultHint');
 
   btn.disabled = true;
   spinner.style.display = 'block';
@@ -332,35 +345,22 @@ async function generateCopy() {
   resultText.textContent = '';
   resultMeta.textContent = '';
 
-  const platformHint = {
-    'FB / IG 貼文': '適合社群貼文，加入適當段落與換行，可加 hashtag',
-    'LINE 訊息': '簡短有力，適合私訊轉發，段落清楚，不超過3段',
-    '早會口頭分享': '適合口頭報告，加入停頓問句，有互動感',
-    '短影音旁白腳本': '用旁白腳本格式，每句話獨立成行，有畫面感',
-  }[selectedPlatform] || '';
+  const userMsg = `請為以下保險業務情境，生成適合貼入【${PLATFORM_NAMES[selectedPlatform]}】的提示詞：
 
-  const userPrompt = `請幫我寫一段保險行銷文案，使用上述故事框架。
+產品／主題：${product}
+目標客群：${audience}
+強調重點：${emphasis || '未特別指定，請根據產品和客群自行判斷'}
+目標平台：${PLATFORM_NAMES[selectedPlatform]}
 
-【產品/主題】${product}
-【目標客群】${audience}
-【強調重點】${emphasis || '未特別指定'}
-【文案風格】${selectedStyle}
-【發布平台】${selectedPlatform}
-
-格式要求：
-- 長度約 200–300 字
-- 繁體中文，台灣口語
-- 自然像朋友說話，不說教
-- 結尾加一句溫和的行動呼籲
-- ${platformHint}`;
+請直接輸出提示詞，不要加任何前言或解釋。`;
 
   try {
     const response = await fetch('/api/generate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        system: TEMPLATES[selectedTemplate].system,
-        messages: [{ role: 'user', content: userPrompt }]
+        system: SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: userMsg }]
       })
     });
 
@@ -374,17 +374,17 @@ async function generateCopy() {
 
     const fullText = data.text || '';
     resultCard.classList.add('show');
-    resultText.textContent = '';
+    resultHint.textContent = PLATFORM_HINTS[selectedPlatform];
+    resultMeta.textContent = `針對 ${PLATFORM_NAMES[selectedPlatform]} 優化 · 共 ${fullText.length} 字元`;
 
     // 打字機效果
+    resultText.textContent = '';
     let i = 0;
     const type = () => {
       if (i < fullText.length) {
         resultText.textContent = fullText.slice(0, ++i);
-        setTimeout(type, 12);
+        setTimeout(type, 8);
       } else {
-        const charCount = fullText.replace(/\s/g, '').length;
-        resultMeta.textContent = `${charCount} 字 · ${selectedPlatform}`;
         resultCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     };
@@ -405,14 +405,14 @@ function showError(msg) {
   el.classList.add('show');
 }
 
-async function copyCopy() {
+async function copyPrompt() {
   const text = document.getElementById('resultText').textContent;
   const btn = document.getElementById('copyBtn');
   try {
     await navigator.clipboard.writeText(text);
     btn.textContent = '已複製 ✓';
     btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = '複製文案'; btn.classList.remove('copied'); }, 2000);
+    setTimeout(() => { btn.textContent = '複製提示詞'; btn.classList.remove('copied'); }, 2000);
   } catch {
     btn.textContent = '請手動複製';
   }
